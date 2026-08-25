@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  SALON_OWNER
+  STYLIST
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  passwordHash  String
+  role          Role           @default(CUSTOMER)
+  avatarUrl     String?
+  refreshTokens RefreshToken[]
+  bookings      Booking[]
+  reviews       Review[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Salon {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  name        String
+  description String    @db.Text
+  address     String
+  city        String
+  distanceKm  Float
+  rating      Float     @default(0)
+  reviewCount Int       @default(0)
+  imageUrl    String?
+  verified    Boolean   @default(false)
+  services    Service[]
+  stylists    Stylist[]
+  offers      Offer[]
+  bookings    Booking[]
+  reviews     Review[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Stylist {
+  id          String    @id @default(uuid())
+  salonId     String
+  salon       Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  name        String
+  title       String
+  bio         String    @db.Text
+  rating      Float     @default(0)
+  imageUrl    String?
+  years       Int
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+}
+
+model Service {
+  id          String    @id @default(uuid())
+  salonId     String
+  salon       Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  name        String
+  category    String
+  description String
+  durationMin Int
+  priceCents  Int
+  imageUrl    String?
+  bookings    Booking[]
+}
+
+model Offer {
+  id          String   @id @default(uuid())
+  salonId     String
+  salon       Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  title       String
+  code        String   @unique
+  discountPct Int
+  expiresAt   DateTime
+}
+
+model Booking {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  salonId     String
+  salon       Salon         @relation(fields: [salonId], references: [id])
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id])
+  stylistId   String?
+  stylist     Stylist?      @relation(fields: [stylistId], references: [id])
+  startsAt    DateTime
+  status      BookingStatus @default(PENDING)
+  totalCents   Int
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  salonId   String
+  salon     Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String   @db.Text
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,21 @@
+{
+  "name": "glam-rapido",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Salon marketplace application with React, Express, Prisma, MySQL, JWT auth, Docker and Swagger.",
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @glam-rapido/web --filter @glam-rapido/api dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @glam-rapido/api db:generate",
+    "db:migrate": "pnpm --filter @glam-rapido/api db:migrate",
+    "db:seed": "pnpm --filter @glam-rapido/api db:seed"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
